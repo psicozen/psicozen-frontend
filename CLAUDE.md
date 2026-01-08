@@ -1,5 +1,8 @@
 # CLAUDE.md
 
+> **🤖 AI SYSTEM INSTRUCTION**: 
+> **ALWAYS** read this file (`CLAUDE.md`) at the start of every chat session. It contains the mandatory project context, architectural guidelines, testing rules, and coding standards that must be followed strictly.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
