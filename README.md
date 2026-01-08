@@ -4,7 +4,7 @@ A production-ready Next.js 16.1.1 boilerplate implementing Clean Architecture pr
 
 ## 🚀 Quick Start
 
-### Prerequisites testando pr
+### Prerequisites
 
 - **Node.js**: ≥20.0.0
 - **npm**: ≥10.0.0
