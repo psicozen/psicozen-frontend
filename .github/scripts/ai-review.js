@@ -15,7 +15,7 @@ const fetch = globalThis.fetch;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const PR_NUMBER = process.env.PR_NUMBER;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash'; // Stable production model (updated 2026-01)
 
 // Variáveis de repositório vêm de GITHUB_REPOSITORY (owner/repo)
 const [REPO_OWNER, REPO_NAME] = (process.env.GITHUB_REPOSITORY || '').split('/');
