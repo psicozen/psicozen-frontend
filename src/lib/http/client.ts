@@ -13,7 +13,9 @@ import axiosRetry from 'axios-retry';
 import { ApiError, NetworkError, TimeoutError } from '../errors/api-error';
 import type { ApiResponse } from '@/types/api.types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// Use proxy route instead of direct backend URL for security
+// All requests go through /api/backend/* which forwards to the actual backend
+const API_BASE_URL = '/api/backend';
 const API_TIMEOUT = 30000; // 30 seconds
 
 class HttpClient {
