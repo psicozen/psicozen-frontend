@@ -69,7 +69,7 @@ export function useAuth() {
         if (process.env.NODE_ENV === 'development') {
           console.group('✅ User Signed In (DEV ONLY)');
           console.log('Access Token:', session.access_token);
-          console.log('Expires At:', new Date(session.expires_at * 1000).toISOString());
+          console.log('Expires At:', session.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'N/A');
           console.log('User:', session.user.email);
           console.groupEnd();
         }
