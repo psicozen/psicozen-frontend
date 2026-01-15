@@ -37,7 +37,7 @@ describe('AuthService', () => {
         },
       };
 
-      mock.onPost('/auth/magic-link/send').reply(200, mockResponse);
+      mock.onPost('/auth/send-magic-link').reply(200, mockResponse);
 
       const result = await authService.sendMagicLink({ email });
 
@@ -72,11 +72,11 @@ describe('AuthService', () => {
         },
       };
 
-      mock.onPost('/auth/magic-link/verify').reply(200, mockResponse);
+      mock.onGet(/\/auth\/callback/).reply(200, mockResponse);
 
       const result = await authService.verifyMagicLink({
-        token: 'magic-token',
-        email: 'test@example.com',
+        token_hash: 'magic-token-hash',
+        type: 'magiclink',
       });
 
       expect(result.user).toEqual(mockUser);

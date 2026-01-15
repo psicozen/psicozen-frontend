@@ -5,20 +5,24 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { AuthState, AuthTokens, User } from '@/types/auth.types';
+import type { User } from '@/types/auth.types';
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
 
 interface AuthStore extends AuthState {
   setUser: (user: User | null) => void;
-  setTokens: (tokens: AuthTokens | null) => void;
   setLoading: (isLoading: boolean) => void;
-  login: (user: User, tokens: AuthTokens) => void;
+  login: (user: User) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
 }
 
 const initialState: AuthState = {
   user: null,
-  tokens: null,
   isAuthenticated: false,
   isLoading: false,
 };
@@ -34,20 +38,14 @@ export const useAuthStore = create<AuthStore>()(
           isAuthenticated: !!user,
         }),
 
-      setTokens: (tokens) =>
-        set({
-          tokens,
-        }),
-
       setLoading: (isLoading) =>
         set({
           isLoading,
         }),
 
-      login: (user, tokens) =>
+      login: (user) =>
         set({
           user,
-          tokens,
           isAuthenticated: true,
           isLoading: false,
         }),
@@ -74,7 +72,6 @@ export const useAuthStore = create<AuthStore>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        tokens: state.tokens,
         isAuthenticated: state.isAuthenticated,
       }),
     },
@@ -83,7 +80,6 @@ export const useAuthStore = create<AuthStore>()(
 
 // Selectors
 export const selectUser = (state: AuthStore) => state.user;
-export const selectTokens = (state: AuthStore) => state.tokens;
 export const selectIsAuthenticated = (state: AuthStore) =>
   state.isAuthenticated;
 export const selectIsLoading = (state: AuthStore) => state.isLoading;

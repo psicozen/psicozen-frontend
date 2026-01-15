@@ -14,6 +14,7 @@ import { useAuth } from '../hooks/use-auth';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { ApiError } from '@/lib/errors/api-error';
+import { env } from '@/lib/config/env';
 
 const magicLinkSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -36,7 +37,9 @@ export function MagicLinkForm() {
 
   const onSubmit = async (data: MagicLinkFormData) => {
     try {
-      await sendMagicLink(data);
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : env.app.url;
+      const redirectTo = `${baseUrl}/auth/callback`;
+      await sendMagicLink({ ...data, redirectTo });
       setEmailSent(true);
       toast.success('Link mágico enviado!', {
         description: 'Verifique seu e-mail para acessar o sistema',

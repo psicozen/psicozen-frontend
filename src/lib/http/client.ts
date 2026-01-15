@@ -18,8 +18,8 @@ const API_TIMEOUT = 30000; // 30 seconds
 
 class HttpClient {
   private client: AxiosInstance;
-  private tokenGetter: (() => string | null) | null = null;
-  private tokenSetter: ((token: string | null) => void) | null = null;
+  private tokenGetter: (() => Promise<string | null>) | null = null;
+  private tokenSetter: ((token: string | null) => Promise<void>) | null = null;
   private orgIdGetter: (() => string | null) | null = null;
 
   constructor() {
@@ -37,10 +37,11 @@ class HttpClient {
 
   /**
    * Register token getter/setter for auth interceptor
+   * Now supports async token retrieval (for Supabase)
    */
   public registerAuthHandlers(
-    getter: () => string | null,
-    setter: (token: string | null) => void,
+    getter: () => Promise<string | null>,
+    setter: (token: string | null) => Promise<void>,
   ): void {
     this.tokenGetter = getter;
     this.tokenSetter = setter;
@@ -59,9 +60,9 @@ class HttpClient {
   private setupInterceptors(): void {
     // Request interceptor - inject auth token
     this.client.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) => {
+      async (config: InternalAxiosRequestConfig) => {
         if (this.tokenGetter) {
-          const token = this.tokenGetter();
+          const token = await this.tokenGetter();
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
           }
@@ -101,11 +102,10 @@ class HttpClient {
 
         const response = error.response;
 
-        // Handle 401 - refresh token
+        // Handle 401 - clear session and redirect to login
         if (response.status === 401 && this.tokenSetter) {
-          // Clear invalid token
-          this.tokenSetter(null);
-          // TODO: Implement token refresh logic
+          await this.tokenSetter(null);
+          // Frontend will handle redirect in useAuth hook
         }
 
         // Transform to ApiError

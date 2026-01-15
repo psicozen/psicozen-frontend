@@ -45,7 +45,7 @@ describe('useAuth Hook', () => {
         },
       };
 
-      mock.onPost('/auth/magic-link/send').reply(200, mockResponse);
+      mock.onPost('/auth/send-magic-link').reply(200, mockResponse);
 
       const { result } = renderHook(() => useAuth());
 
@@ -61,7 +61,7 @@ describe('useAuth Hook', () => {
     });
 
     it('should set loading state during magic link send', async () => {
-      mock.onPost('/auth/magic-link/send').reply(() => {
+      mock.onPost('/auth/send-magic-link').reply(() => {
         return new Promise((resolve) => {
           setTimeout(() => {
             resolve([
@@ -119,14 +119,14 @@ describe('useAuth Hook', () => {
         },
       };
 
-      mock.onPost('/auth/magic-link/verify').reply(200, mockResponse);
+      mock.onGet(/\/auth\/callback/).reply(200, mockResponse);
 
       const { result } = renderHook(() => useAuth());
 
       await act(async () => {
         await result.current.verifyMagicLink({
-          token: 'magic-token',
-          email: 'test@example.com',
+          token_hash: 'magic-token-hash',
+          type: 'magiclink',
         });
       });
 

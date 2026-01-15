@@ -8,22 +8,16 @@
 import { useCallback, useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth.store';
 import { authService } from '../services/auth.service';
+import { supabase } from '@/lib/supabase/client';
 import { httpClient } from '@/lib/http/client';
-import type {
-  LoginCredentials,
-  MagicLinkRequest,
-  MagicLinkVerification,
-  User,
-} from '@/types/auth.types';
+import type { MagicLinkRequest, User } from '@/types/auth.types';
 import { ApiError } from '@/lib/errors/api-error';
 
 export function useAuth() {
   const {
     user,
-    tokens,
     isAuthenticated,
     isLoading,
-    login: storeLogin,
     logout: storeLogout,
     setLoading,
     updateUser,
@@ -32,14 +26,58 @@ export function useAuth() {
   // Register auth handlers with HTTP client
   useEffect(() => {
     httpClient.registerAuthHandlers(
-      () => tokens?.accessToken || null,
-      (token) => {
+      // Get Supabase access token
+      async () => {
+        const { data } = await supabase.auth.getSession();
+        const accessToken = data.session?.access_token || null;
+
+        // 🔒 DEV ONLY: Log access token for Postman testing
+        if (process.env.NODE_ENV === 'development' && accessToken) {
+          console.group('🔐 Auth Token (DEV ONLY)');
+          console.log('Access Token:', accessToken);
+          console.log('Expires At:', data.session?.expires_at ? new Date(data.session.expires_at * 1000).toISOString() : 'N/A');
+          console.log('User:', data.session?.user?.email);
+          console.groupEnd();
+        }
+
+        return accessToken;
+      },
+      // Handle token invalidation
+      async (token) => {
         if (token === null) {
           storeLogout();
+          await supabase.auth.signOut();
         }
       },
     );
-  }, [tokens?.accessToken, storeLogout]);
+  }, [storeLogout]);
+
+  // Monitor Supabase auth state changes
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        storeLogout();
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        // Supabase auto-refreshed the token, no action needed
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔄 Token refreshed automatically by Supabase');
+        }
+      } else if (event === 'SIGNED_IN' && session) {
+        // 🔒 DEV ONLY: Log new session details
+        if (process.env.NODE_ENV === 'development') {
+          console.group('✅ User Signed In (DEV ONLY)');
+          console.log('Access Token:', session.access_token);
+          console.log('Expires At:', new Date(session.expires_at * 1000).toISOString());
+          console.log('User:', session.user.email);
+          console.groupEnd();
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [storeLogout]);
 
   /**
    * Send magic link to email
@@ -63,60 +101,20 @@ export function useAuth() {
   );
 
   /**
-   * Verify magic link and authenticate
-   */
-  const verifyMagicLink = useCallback(
-    async (data: MagicLinkVerification) => {
-      try {
-        setLoading(true);
-        const response = await authService.verifyMagicLink(data);
-        storeLogin(response.user, response.tokens);
-        return response;
-      } catch (error) {
-        if (error instanceof ApiError) {
-          throw error;
-        }
-        throw new Error('Failed to verify magic link');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [setLoading, storeLogin],
-  );
-
-  /**
-   * Login with email/password
-   */
-  const login = useCallback(
-    async (credentials: LoginCredentials) => {
-      try {
-        setLoading(true);
-        const response = await authService.login(credentials);
-        storeLogin(response.user, response.tokens);
-        return response;
-      } catch (error) {
-        if (error instanceof ApiError) {
-          throw error;
-        }
-        throw new Error('Login failed');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [setLoading, storeLogin],
-  );
-
-  /**
    * Logout user
    */
   const logout = useCallback(async () => {
     try {
       setLoading(true);
-      await authService.logout();
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      // Clear local store
+      storeLogout();
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
+      // Force local logout even if Supabase signout fails
       storeLogout();
+    } finally {
       setLoading(false);
     }
   }, [setLoading, storeLogout]);
@@ -135,6 +133,7 @@ export function useAuth() {
     } catch (error) {
       if (error instanceof ApiError && error.isAuthError()) {
         storeLogout();
+        await supabase.auth.signOut();
       }
       throw error;
     } finally {
@@ -171,14 +170,11 @@ export function useAuth() {
   return {
     // State
     user,
-    tokens,
     isAuthenticated,
     isLoading,
 
     // Actions
     sendMagicLink,
-    verifyMagicLink,
-    login,
     logout,
     refreshProfile,
     updateProfile,

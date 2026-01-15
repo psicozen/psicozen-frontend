@@ -4,18 +4,7 @@
  */
 
 import { httpClient } from '@/lib/http/client';
-import type {
-  User,
-  AuthTokens,
-  LoginCredentials,
-  MagicLinkRequest,
-  MagicLinkVerification,
-} from '@/types/auth.types';
-
-export interface LoginResponse {
-  user: User;
-  tokens: AuthTokens;
-}
+import type { User, MagicLinkRequest } from '@/types/auth.types';
 
 export interface MagicLinkResponse {
   message: string;
@@ -41,7 +30,7 @@ export class AuthService {
    */
   async sendMagicLink(data: MagicLinkRequest): Promise<MagicLinkResponse> {
     const response = await httpClient.post<MagicLinkResponse>(
-      `${this.baseUrl}/magic-link/send`,
+      `${this.baseUrl}/send-magic-link`,
       data,
     );
 
@@ -53,46 +42,6 @@ export class AuthService {
   }
 
   /**
-   * Verify magic link token and authenticate user
-   */
-  async verifyMagicLink(
-    data: MagicLinkVerification,
-  ): Promise<LoginResponse> {
-    const response = await httpClient.post<LoginResponse>(
-      `${this.baseUrl}/magic-link/verify`,
-      data,
-    );
-
-    if (!response.success) {
-      throw new Error('Failed to verify magic link');
-    }
-
-    return {
-      ...response.data,
-      user: this.transformUser(response.data.user),
-    };
-  }
-
-  /**
-   * Traditional email/password login
-   */
-  async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await httpClient.post<LoginResponse>(
-      `${this.baseUrl}/login`,
-      credentials,
-    );
-
-    if (!response.success) {
-      throw new Error('Login failed');
-    }
-
-    return {
-      ...response.data,
-      user: this.transformUser(response.data.user),
-    };
-  }
-
-  /**
    * Logout user
    */
   async logout(): Promise<void> {
@@ -100,26 +49,10 @@ export class AuthService {
   }
 
   /**
-   * Refresh access token
-   */
-  async refreshToken(refreshToken: string): Promise<AuthTokens> {
-    const response = await httpClient.post<AuthTokens>(
-      `${this.baseUrl}/refresh`,
-      { refreshToken },
-    );
-
-    if (!response.success) {
-      throw new Error('Token refresh failed');
-    }
-
-    return response.data;
-  }
-
-  /**
    * Get current user profile
    */
   async getProfile(): Promise<User> {
-    const response = await httpClient.get<User>(`${this.baseUrl}/profile`);
+    const response = await httpClient.get<User>(`${this.baseUrl}/me`);
 
     if (!response.success) {
       throw new Error('Failed to fetch profile');

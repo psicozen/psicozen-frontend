@@ -15,9 +15,14 @@ const protectedRoutes = ['/dashboard', '/profile', '/settings'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check if user has auth token in cookies/headers
-  const token = request.cookies.get('accessToken')?.value;
-  const isAuthenticated = !!token;
+  // Check Supabase session from cookies
+  // Supabase stores auth tokens in cookies with specific naming pattern
+  const supabaseAuthToken = request.cookies.get('sb-access-token')?.value ||
+    request.cookies.get('supabase-auth-token')?.value;
+
+  // Also check localStorage persistence (accessed via client-side only)
+  // For middleware, we rely on cookie presence
+  const isAuthenticated = !!supabaseAuthToken;
 
   // Redirect authenticated users away from public auth pages
   if (isAuthenticated && publicRoutes.includes(pathname)) {
@@ -25,7 +30,10 @@ export function middleware(request: NextRequest) {
   }
 
   // Redirect unauthenticated users to login
-  if (!isAuthenticated && protectedRoutes.some((route) => pathname.startsWith(route))) {
+  if (
+    !isAuthenticated &&
+    protectedRoutes.some((route) => pathname.startsWith(route))
+  ) {
     const url = new URL('/login', request.url);
     url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
