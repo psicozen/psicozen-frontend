@@ -38,17 +38,17 @@ export function MagicLinkForm() {
     try {
       await sendMagicLink(data);
       setEmailSent(true);
-      toast.success('Magic link sent!', {
-        description: 'Check your email for the login link',
+      toast.success('Link mágico enviado!', {
+        description: 'Verifique seu e-mail para acessar o sistema',
       });
     } catch (error) {
       if (error instanceof ApiError) {
-        toast.error('Failed to send magic link', {
+        toast.error('Falha ao enviar link', {
           description: error.message,
         });
       } else {
-        toast.error('Something went wrong', {
-          description: 'Please try again later',
+        toast.error('Algo deu errado', {
+          description: 'Por favor, tente novamente mais tarde',
         });
       }
     }
@@ -56,10 +56,10 @@ export function MagicLinkForm() {
 
   if (emailSent) {
     return (
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+      <div className="rounded-2xl border border-white/40 bg-white/60 p-8 shadow-sm backdrop-blur-md">
+        <div className="mb-6 flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-primary/10 text-primary">
           <svg
-            className="h-6 w-6 text-green-600 dark:text-green-400"
+            className="h-8 w-8"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -73,48 +73,55 @@ export function MagicLinkForm() {
           </svg>
         </div>
 
-        <h3 className="mb-2 text-lg font-semibold text-foreground">
-          Check your email
+        <h3 className="mb-2 text-center text-xl font-bold text-zinc-900">
+          Verifique seu e-mail
         </h3>
-        <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-          We've sent you a magic link to sign in. Click the link in your email to
-          continue.
+        <p className="mb-6 text-center text-zinc-600">
+          Enviamos um link mágico para você entrar. Clique no link recebido para continuar.
         </p>
 
         <Button
           variant="outline"
-          fullWidth
+          className="w-full border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900"
           onClick={() => setEmailSent(false)}
         >
-          Send another link
+          Enviar outro link
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-      <h2 className="mb-6 text-2xl font-bold text-foreground">
-        Sign in with Magic Link
+    <div className="rounded-2xl border border-white/40 bg-white/60 p-8 shadow-xl backdrop-blur-md">
+      <h2 className="mb-2 text-2xl font-bold text-zinc-900">
+        Bem-vindo de volta
       </h2>
+      <p className="mb-8 text-zinc-600">
+        Digite seu e-mail para receber um link de acesso sem senha.
+      </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input
-          label="Email"
+          label="E-mail Corporativo"
           type="email"
-          placeholder="you@example.com"
+          placeholder="voce@empresa.com"
           error={errors.email?.message}
           required
           {...register('email')}
+          className="bg-white/80 border-zinc-200 focus:border-primary focus:ring-primary/20"
         />
 
-        <Button type="submit" fullWidth isLoading={isSubmitting}>
-          Send Magic Link
+        <Button 
+          type="submit" 
+          className="w-full bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 h-11" 
+          isLoading={isSubmitting}
+        >
+          Enviar Link Mágico
         </Button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
-        We'll send you a secure link to sign in without a password
+      <p className="mt-6 text-center text-xs text-zinc-500">
+        Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade.
       </p>
     </div>
   );

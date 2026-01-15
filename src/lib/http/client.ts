@@ -20,6 +20,7 @@ class HttpClient {
   private client: AxiosInstance;
   private tokenGetter: (() => string | null) | null = null;
   private tokenSetter: ((token: string | null) => void) | null = null;
+  private orgIdGetter: (() => string | null) | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -46,6 +47,13 @@ class HttpClient {
   }
 
   /**
+   * Register org ID getter for header interceptor
+   */
+  public registerOrgIdHandlers(getter: () => string | null): void {
+    this.orgIdGetter = getter;
+  }
+
+  /**
    * Setup request/response interceptors
    */
   private setupInterceptors(): void {
@@ -56,6 +64,13 @@ class HttpClient {
           const token = this.tokenGetter();
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+          }
+        }
+
+        if (this.orgIdGetter) {
+          const orgId = this.orgIdGetter();
+          if (orgId) {
+            config.headers['x-organization-id'] = orgId;
           }
         }
         return config;

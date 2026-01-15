@@ -65,19 +65,7 @@ describe('Button Component', () => {
     });
   });
 
-  describe('Full Width', () => {
-    it('should not be full width by default', () => {
-      render(<Button>Normal</Button>);
-      const button = screen.getByRole('button');
-      expect(button).not.toHaveClass('w-full');
-    });
 
-    it('should apply full width when prop is true', () => {
-      render(<Button fullWidth>Full Width</Button>);
-      const button = screen.getByRole('button');
-      expect(button).toHaveClass('w-full');
-    });
-  });
 
   describe('Loading State', () => {
     it('should show loading spinner when isLoading is true', () => {

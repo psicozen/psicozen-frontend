@@ -6,18 +6,18 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  display: "swap", // Prevent font loading from blocking render
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  display: "swap", // Prevent font loading from blocking render
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "PsicoZen - Your Mental Health Companion",
-  description: "Professional mental health support and wellness tracking",
+  title: "PsicoZen | Bem-estar Corporativo",
+  description: "Plataforma de gestão de bem-estar e saúde mental corporativa.",
 };
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

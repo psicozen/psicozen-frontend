@@ -31,6 +31,9 @@ describe('MagicLinkForm Component', () => {
       login: jest.fn(),
       logout: jest.fn(),
       verifyMagicLink: jest.fn(),
+      tokens: null,
+      refreshProfile: jest.fn(),
+      updateProfile: jest.fn(),
     });
 
     mockToast.success = jest.fn();
